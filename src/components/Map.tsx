@@ -1,35 +1,55 @@
 import React from 'react'
 import { MapContainer, Marker, TileLayer } from 'react-leaflet'
-import { Map as LeafletMap } from 'leaflet'
+import { FeatureGroup, LatLngTuple, Map as LeafletMap, Marker as LeafletMarker } from 'leaflet'
+import { SubsurfaceDivelog } from '../model/model'
+import { getLatLong } from '../utils/mapUtils'
 
-export const MAX_ZOOM = 17
-export const MIN_ZOOM = 2
-export const DEFAULT_ZOOM = 13
+const DEFAULT_ZOOM = 13
+const DEFAULT_LAT_LONG: LatLngTuple = [0, 0]
 
-const defaultLatLng: L.LatLngTuple = [0, 0]
+interface MapProps {
+  subsurfaceLog?: SubsurfaceDivelog
+}
 
-const Map = (): React.ReactElement => {
-  const [, setMap] = React.useState<LeafletMap | null>(null)
-  const [position, setPosition] = React.useState<L.LatLngTuple | null>(null)
+const Map = (props: MapProps): React.ReactElement => {
+  const [map, setMap] = React.useState<LeafletMap | null>(null)
+  const [position, setPosition] = React.useState<LatLngTuple | null>(null)
+  const [markers, setMarkers] = React.useState<LeafletMarker[]>([])
+
+  React.useEffect(() => {
+    if (props.subsurfaceLog) {
+      const newMarkers = props.subsurfaceLog.divelog.divesites[0].site.map(
+        (s) => new LeafletMarker(getLatLong(s.$, DEFAULT_LAT_LONG), { title: s.$.name })
+      )
+
+      setMarkers(newMarkers)
+      fitAll(newMarkers)
+    }
+  }, [props.subsurfaceLog])
+
+  const fitAll = (markers: LeafletMarker[]): void => {
+    if (map && markers.length) {
+      const group = new FeatureGroup()
+      markers.forEach((marker: LeafletMarker) => marker.addTo(group))
+      map.fitBounds(group.getBounds())
+    }
+  }
 
   React.useEffect(() => {
     try {
       if (!position) {
         navigator.geolocation.getCurrentPosition((geolocation) => {
-          const location: L.LatLngTuple = [
-            geolocation.coords.latitude,
-            geolocation.coords.longitude,
-          ]
+          const location: LatLngTuple = [geolocation.coords.latitude, geolocation.coords.longitude]
           setPosition(location)
         })
       }
     } catch (e) {
-      setPosition(defaultLatLng)
+      setPosition(DEFAULT_LAT_LONG)
     }
   }, [])
 
   return (
-    <div className="relative">
+    <div className="relative z-10">
       {position && (
         <MapContainer center={position} zoom={DEFAULT_ZOOM} whenCreated={setMap}>
           <TileLayer
@@ -37,6 +57,14 @@ const Map = (): React.ReactElement => {
             url="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           {position && <Marker position={position} />}
+          {props.subsurfaceLog &&
+            markers.map((ss) => (
+              <Marker
+                key={ss.getElement()?.id}
+                position={ss.getLatLng()}
+                title={ss.options.title}
+              />
+            ))}
         </MapContainer>
       )}
     </div>

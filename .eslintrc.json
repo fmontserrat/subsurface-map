@@ -40,12 +40,6 @@
     "no-new-wrappers": "off",
     "@typescript-eslint/explicit-function-return-type": "error",
     "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/no-non-null-assertion": "error",
-    "no-console": [
-      "error",
-      {
-        "allow": ["warn", "error"]
-      }
-    ]
+    "@typescript-eslint/no-non-null-assertion": "error"
   }
 }
