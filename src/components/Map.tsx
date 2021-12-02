@@ -1,8 +1,9 @@
 import React from 'react'
-import { MapContainer, Marker, TileLayer } from 'react-leaflet'
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import { FeatureGroup, LatLngTuple, Map as LeafletMap, Marker as LeafletMarker } from 'leaflet'
-import { SubsurfaceDivelog } from '../model/model'
+import { MapMarker, SubsurfaceDivelog } from '../model/model'
 import { getLatLong } from '../utils/mapUtils'
+import { countDivesInSite } from '../utils/logbookUtils'
 
 const DEFAULT_ZOOM = 13
 const DEFAULT_LAT_LONG: LatLngTuple = [0, 0]
@@ -14,13 +15,17 @@ interface MapProps {
 const Map = (props: MapProps): React.ReactElement => {
   const [map, setMap] = React.useState<LeafletMap | null>(null)
   const [position, setPosition] = React.useState<LatLngTuple | null>(null)
-  const [markers, setMarkers] = React.useState<LeafletMarker[]>([])
+  const [markers, setMarkers] = React.useState<MapMarker[]>([])
 
   React.useEffect(() => {
     if (props.subsurfaceLog) {
-      const newMarkers = props.subsurfaceLog.divelog.divesites[0].site.map(
-        (s) => new LeafletMarker(getLatLong(s.$, DEFAULT_LAT_LONG), { title: s.$.name })
-      )
+      const newMarkers = props.subsurfaceLog.divelog.divesites[0].site.map((s) => {
+        const marker: MapMarker = new LeafletMarker(getLatLong(s.$, DEFAULT_LAT_LONG), {
+          title: s.$.name,
+        })
+        marker.subsurfaceId = s.$.uuid
+        return marker
+      })
 
       setMarkers(newMarkers)
       fitAll(newMarkers)
@@ -58,13 +63,20 @@ const Map = (props: MapProps): React.ReactElement => {
           />
           {position && <Marker position={position} />}
           {props.subsurfaceLog &&
-            markers.map((ss) => (
-              <Marker
-                key={ss.getElement()?.id}
-                position={ss.getLatLng()}
-                title={ss.options.title}
-              />
-            ))}
+            markers.map((m) => {
+              const numDives = countDivesInSite(
+                props.subsurfaceLog?.divelog.dives[0].dive || [],
+                m.subsurfaceId
+              )
+              return (
+                <Marker key={m.getElement()?.id} position={m.getLatLng()} title={m.options.title}>
+                  <Popup>
+                    <h2>{m.options.title}</h2>
+                    <div>{`${numDives} ${numDives !== 1 ? 'dives' : 'dive'}`}</div>
+                  </Popup>
+                </Marker>
+              )
+            })}
         </MapContainer>
       )}
     </div>

@@ -1,3 +1,5 @@
+import { Marker as LeafletMarker } from 'leaflet'
+
 export interface SubsurfaceDivelog {
   divelog: {
     dives: { dive: SubsurfaceDive[] }[]
@@ -12,6 +14,7 @@ export interface SubsurfaceDive {
     duration: string
     visibility?: string
     tags?: string
+    divesiteid: string
   }
   weightsystem?: Weight | Weight[]
   notes?: string[]
@@ -95,4 +98,8 @@ export interface SubsurfaceSiteModel {
   uuid: string
   name: string
   gps: string
+}
+
+export interface MapMarker extends LeafletMarker {
+  subsurfaceId?: string
 }
