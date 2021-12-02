@@ -1,9 +1,10 @@
 import React from 'react'
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
+import { MapContainer, Marker, TileLayer } from 'react-leaflet'
 import { FeatureGroup, LatLngTuple, Map as LeafletMap, Marker as LeafletMarker } from 'leaflet'
 import { MapMarker, SubsurfaceDivelog } from '../model/model'
 import { getLatLong } from '../utils/mapUtils'
-import { countDivesInSite } from '../utils/logbookUtils'
+import { filterDivesBySite } from '../utils/logbookUtils'
+import DiveSiteMarker from './DiveSiteMarker'
 
 const DEFAULT_ZOOM = 13
 const DEFAULT_LAT_LONG: LatLngTuple = [0, 0]
@@ -63,20 +64,16 @@ const Map = (props: MapProps): React.ReactElement => {
           />
           {position && <Marker position={position} />}
           {props.subsurfaceLog &&
-            markers.map((m) => {
-              const numDives = countDivesInSite(
-                props.subsurfaceLog?.divelog.dives[0].dive || [],
-                m.subsurfaceId
-              )
-              return (
-                <Marker key={m.getElement()?.id} position={m.getLatLng()} title={m.options.title}>
-                  <Popup>
-                    <h2>{m.options.title}</h2>
-                    <div>{`${numDives} ${numDives !== 1 ? 'dives' : 'dive'}`}</div>
-                  </Popup>
-                </Marker>
-              )
-            })}
+            markers.map((m) => (
+              <DiveSiteMarker
+                key={m.getElement()?.id}
+                marker={m}
+                dives={filterDivesBySite(
+                  props.subsurfaceLog?.divelog.dives[0].dive || [],
+                  m.subsurfaceId
+                )}
+              />
+            ))}
         </MapContainer>
       )}
     </div>

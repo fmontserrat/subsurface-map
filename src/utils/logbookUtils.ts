@@ -1,9 +1,9 @@
 import { SubsurfaceDive } from '../model/model'
 
-export const countDivesInSite = (dives: SubsurfaceDive[], siteId?: string): number => {
+export const filterDivesBySite = (dives: SubsurfaceDive[], siteId?: string): SubsurfaceDive[] => {
   if (!siteId) {
-    return 0
+    return []
   }
 
-  return dives.filter((d) => d.$.divesiteid === siteId).length
+  return dives.filter((d) => d.$.divesiteid === siteId)
 }
