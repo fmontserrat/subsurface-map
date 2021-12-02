@@ -1,2 +1,3 @@
-# subsurface-map
-Import and visualize your dives in a map
+# Subsurface Map
+
+Import and render your subsurface data in a map
