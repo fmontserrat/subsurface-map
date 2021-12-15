@@ -15,6 +15,7 @@ export interface SubsurfaceDive {
     visibility?: string
     tags?: string
     divesiteid: string
+    number: number
   }
   weightsystem?: Weight | Weight[]
   notes?: string[]

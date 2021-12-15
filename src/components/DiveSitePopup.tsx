@@ -13,6 +13,13 @@ const DiveSitePopup = ({ marker, dives }: DiveSitePopupProps): React.ReactElemen
     <Popup>
       <h2 className="text-lg mb-2">{marker.options.title}</h2>
       <div className="text-base">{`${dives.length} ${dives.length !== 1 ? 'dives' : 'dive'}`}</div>
+      <ul>
+        {dives.map((d) => (
+          <li className="mt-2" key={d.$.number}>
+            #{d.$.number}
+          </li>
+        ))}
+      </ul>
     </Popup>
   )
 }
